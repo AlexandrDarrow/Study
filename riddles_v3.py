@@ -8,8 +8,10 @@ bot.delete_webhook()
 
 
 def listener(messages):
-    print("listener received")
+    print("def Listener get params")
     for m in messages:
+        if m.text.startswith("/"):
+            continue
         checkuser(m)
         text = m.text
         continue
@@ -20,16 +22,24 @@ def checkuser(message):
  uid = message.chat.id
  with connection.cursor() as cur:
      cur.execute("select * from riddle_users where id = %s", uid)
-     data = cur.fetchone()
-     uid1 = data["id"]
-     uname = data["username"]
-     if data == None:
+     user = cur.fetchone()
+     uid1 = user["id"]
+     uname = user["username"]
+     if user == None:
          bot.send_message(uid, "Я тебя раньше не видел")
-         print("checkuser")
+         print("def Checkuser 1 get params")
          bot.send_message(uid, "Начинаем новую игру")
          question(message)
      else:
-         checkanswer(message)
+         cur.execute("select * from riddle_answers where userid = %s and answer is null limit 1", uid)
+         questioncheck = cur.fetchone()
+         print("def Checkuser 2 get params")
+         if questioncheck == None:
+             bot.send_message(uid, "Для начала игры набери /start")
+             print("def Checkuser 21 get params")
+         else:
+             print("def Checkuser 22 get params")
+             checkanswer(message)
 
 
 def question(message):
@@ -39,22 +49,23 @@ def question(message):
         data = cur.fetchone()
         q = data["question"]
         bot.send_message(uid, "Загадка: " + q)
-        cur.execute("insert into riddle_answers values ()")
-    print("question")
+        #cur.execute("insert into riddle_answers values ()")
+    print("def Question get params")
 
 
-def checkanswer():
-    print("checkanswer")
+def checkanswer(message):
+
+    print("def Checkanswer get params")
 
 
 @bot.message_handler(commands=['reset'])
 def reset_user(message):
-    print("start reset")
+    print("def Reset get params")
 
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    print("start start")
+    print("def Start get params")
 
 bot.set_update_listener(listener)  # register listener
 name = bot.get_me()
